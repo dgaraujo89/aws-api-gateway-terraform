@@ -6,3 +6,15 @@ variable "region" {
 variable "profile" {
   default = "default"
 }
+
+variable "domain_name" {
+  default = ""
+}
+
+variable "certificate" {
+  default = ""
+}
+
+variable "private_key" {
+  default = ""
+}

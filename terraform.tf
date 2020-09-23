@@ -38,6 +38,24 @@ resource "aws_api_gateway_deployment" "deployment" {
   stage_description = "Teste environment"
 }
 
-output "deploy_url" {
-  value = aws_api_gateway_deployment.deployment.invoke_url
+# domain
+
+resource "aws_api_gateway_domain_name" "api" {
+  domain_name              = "api.${var.domain_name}"
+  regional_certificate_arn = aws_acm_certificate.cert.arn
+
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+
+  depends_on = [
+    aws_acm_certificate.cert
+  ]
+}
+
+resource "aws_api_gateway_base_path_mapping" "test" {
+  api_id      = aws_api_gateway_rest_api.cep_root.id
+  stage_name  = aws_api_gateway_deployment.deployment.stage_name
+  domain_name = aws_api_gateway_domain_name.api.domain_name
+  base_path   = "test"
 }
