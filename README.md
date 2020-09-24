@@ -1,6 +1,6 @@
 # AWS Api Gateway Terraform
 
-This project create an api gateway to [ViaCep](https://viacep.com.br) and expose it in a subdomain api (api.example.com)
+This project create an api gateway to [ViaCep](https://viacep.com.br) and expose it in a subdomain api (ex: api.example.com)
 
 This project use the following aws resources
 - Cognito (user pool)
