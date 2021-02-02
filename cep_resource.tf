@@ -48,3 +48,14 @@ resource "aws_api_gateway_integration" "cep" {
     "integration.request.path.cep" = "method.request.path.cep"
   }
 }
+
+resource "aws_api_gateway_method_settings" "cep_settings" {
+  rest_api_id = aws_api_gateway_rest_api.cep_root.id
+  stage_name = aws_api_gateway_deployment.deployment.stage_name
+  method_path = "${trimprefix(aws_api_gateway_resource.cep_arg.path, "/")}/${aws_api_gateway_method.cep.http_method}"
+
+  settings {
+    throttling_rate_limit = 2
+    throttling_burst_limit = 2
+  }
+}

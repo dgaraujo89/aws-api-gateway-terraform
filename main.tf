@@ -59,3 +59,4 @@ resource "aws_api_gateway_base_path_mapping" "test" {
   domain_name = aws_api_gateway_domain_name.api.domain_name
   base_path   = "test"
 }
+
