@@ -2,17 +2,17 @@
 # Cognito user pool
 
 resource "aws_cognito_user_pool" "pool" {
-  name = "cep-api-users"
+  name = var.pool_name
 }
 
 resource "aws_cognito_user_pool_domain" "domain" {
-  domain       = "cep-api"
+  domain       = var.domain_name
   user_pool_id = aws_cognito_user_pool.pool.id
 }
 
 resource "aws_cognito_resource_server" "resource" {
-  identifier = "cep-api"
-  name       = "cep-api"
+  identifier = "${var.domain_name}-server"
+  name       = "${var.domain_name}-server"
 
   scope {
     scope_name        = "read"

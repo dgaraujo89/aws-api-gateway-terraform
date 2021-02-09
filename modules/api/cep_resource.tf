@@ -10,14 +10,13 @@ resource "aws_api_gateway_authorizer" "auth" {
   name          = "CepAuthorizer"
   rest_api_id   = aws_api_gateway_rest_api.cep_root.id
   type          = "COGNITO_USER_POOLS"
-  provider_arns = [aws_cognito_user_pool.pool.arn]
+  provider_arns = [var.user_pool.arn]
 }
 
 resource "aws_api_gateway_resource" "cep_arg" {
   rest_api_id = aws_api_gateway_rest_api.cep_root.id
   parent_id   = aws_api_gateway_resource.cep.id
   path_part   = "{cep+}"
-
 }
 
 resource "aws_api_gateway_method" "cep" {
@@ -27,7 +26,7 @@ resource "aws_api_gateway_method" "cep" {
 
   authorization        = "COGNITO_USER_POOLS"
   authorizer_id        = aws_api_gateway_authorizer.auth.id
-  authorization_scopes = aws_cognito_user_pool_client.client.allowed_oauth_scopes
+  authorization_scopes = var.user_pool.scopes
 
   request_parameters = {
     "method.request.path.cep" = true
@@ -51,11 +50,11 @@ resource "aws_api_gateway_integration" "cep" {
 
 resource "aws_api_gateway_method_settings" "cep_settings" {
   rest_api_id = aws_api_gateway_rest_api.cep_root.id
-  stage_name = aws_api_gateway_deployment.deployment.stage_name
+  stage_name  = aws_api_gateway_deployment.deployment.stage_name
   method_path = "${trimprefix(aws_api_gateway_resource.cep_arg.path, "/")}/${aws_api_gateway_method.cep.http_method}"
 
   settings {
-    throttling_rate_limit = 2
+    throttling_rate_limit  = 2
     throttling_burst_limit = 2
   }
 }

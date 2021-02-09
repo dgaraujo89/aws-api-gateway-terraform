@@ -6,6 +6,12 @@ terraform {
       version = "~> 3.0"
     }
   }
+  backend "s3" {
+    bucket  = "<bucket name>"
+    key     = "api/cep/tfstate"
+    region  = "us-east-1"
+    encrypt = true
+  }
 }
 
 provider "aws" {
@@ -13,50 +19,29 @@ provider "aws" {
   region  = var.region
 }
 
+module "user_pool" {
+  source = "./modules/user_pool"
 
-# Api Gateway
-
-resource "aws_api_gateway_rest_api" "cep_root" {
-  name        = "cep-api"
-  description = "This is a proxy to viacep.com.br"
-
-  endpoint_configuration {
-    types = ["REGIONAL"]
-  }
+  domain_name = "cep-api"
+  pool_name   = "cep-api-users"
 }
 
-# API deployment to test environment
+module "api" {
+  source = "./modules/api"
 
-resource "aws_api_gateway_deployment" "deployment" {
-  depends_on = [
-    aws_api_gateway_integration.cep,
-    aws_api_gateway_integration.token
-  ]
+  domain_name = var.domain_name
+  region      = var.region
 
-  rest_api_id       = aws_api_gateway_rest_api.cep_root.id
-  stage_name        = "test"
-  stage_description = "Teste environment"
-}
+  certificate = var.certificate
+  private_key = var.private_key
 
-# domain
-
-resource "aws_api_gateway_domain_name" "api" {
-  domain_name              = "api.${var.domain_name}"
-  regional_certificate_arn = aws_acm_certificate.cert.arn
-
-  endpoint_configuration {
-    types = ["REGIONAL"]
+  user_pool = {
+    domain = module.user_pool.domain
+    arn    = module.user_pool.arn
+    scopes = module.user_pool.scopes
   }
 
   depends_on = [
-    aws_acm_certificate.cert
+    module.user_pool
   ]
 }
-
-resource "aws_api_gateway_base_path_mapping" "test" {
-  api_id      = aws_api_gateway_rest_api.cep_root.id
-  stage_name  = aws_api_gateway_deployment.deployment.stage_name
-  domain_name = aws_api_gateway_domain_name.api.domain_name
-  base_path   = "test"
-}
-

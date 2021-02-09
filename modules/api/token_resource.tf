@@ -22,5 +22,5 @@ resource "aws_api_gateway_integration" "token" {
   integration_http_method = aws_api_gateway_method.token.http_method
 
   type = "HTTP_PROXY"
-  uri  = "https://${aws_cognito_user_pool_domain.domain.domain}.auth.${var.region}.amazoncognito.com/oauth2/token"
+  uri  = "https://${var.user_pool.domain}.auth.${var.region}.amazoncognito.com/oauth2/token"
 }
